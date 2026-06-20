@@ -6,8 +6,9 @@
 
 OneAI adalah skrip Python canggih yang dirancang khusus untuk lingkungan Termux (Android). Ini bukan sekadar chatbot biasa; ini adalah asisten sistem pintar yang terintegrasi dengan API OpenRouter, dilengkapi dengan fitur self-patching, manajemen database lokal, hingga sandbox terminal untuk bereksperimen dengan aman! 🖥️📱
 
-🌟 Fitur Unggulan
+Mau ikut bantu? Cek [CONTRIBUTING.md](CONTRIBUTING.md) buat panduan kontribusi.
 
+🌟 Fitur Unggulan
 - 🧠 *Multi-Persona AI*: Ubah gaya bicara AI sesuai kebutuhanmu (Teman, Tsundere, Profesional, atau Pakar Coding).
 - 🛠️ *Self-Coder (Auto-Patching)*: AI bisa memodifikasi dan memperbarui kodenya sendiri secara cerdas! (Fitur keamanan: Anti-Edit Mode).
 - 📡 *Smart Router API*: Otomatis menangani limit API (429 Error), backoff sistem, dan fallback model jika satu model sedang down.
