@@ -4,20 +4,36 @@ OneAI adalah skrip Python canggih yang dirancang khusus untuk lingkungan Termux 
 
 ​✨ Fitur Unggulan
 
-​🧠 Multi-Persona AI: Ubah gaya bicara AI sesuai kebutuhanmu (Teman, Tsundere, Profesional, atau Pakar Coding).
 ​
+
+🧠 Multi-Persona AI: Ubah gaya bicara AI sesuai kebutuhanmu (Teman, Tsundere, Profesional, atau Pakar Coding).
+​
+
+
 🛠️ Self-Coder (Auto-Patching): AI bisa memodifikasi dan memperbarui kodenya sendiri secara cerdas! (Fitur keamanan: Anti-Edit Mode).
 
-​📡 Smart Router API: Otomatis menangani limit API (429 Error), backoff sistem, dan fallback model jika satu model sedang down.
+​
 
-​🔍 Browser & Search: Terintegrasi dengan berbagai mesin pencari populer untuk kebutuhan riset.
+📡 Smart Router API: Otomatis menangani limit API (429 Error), backoff sistem, dan fallback model jika satu model sedang down.
+
+​
+
+🔍 Browser & Search: Terintegrasi dengan berbagai mesin pencari populer untuk kebutuhan riset.
+
+
 
 ​🔐 Jaringan Aman: Mendukung koneksi via Tor (SOCKS5) untuk anonimitas maksimal.
 ​
+
+
 🧪 Sandbox Terminal: Jalankan perintah Linux/Termux di dalam lingkungan yang terisolasi dengan filter keamanan.
 ​
+
+
 📚 Database Belajar: AI memiliki "ingatan" jangka panjang melalui sistem database lokal.
 ​
+
+
 🎨 UI Neon & Interaktif: Tampilan terminal penuh warna (ANSI 256-color) yang memanjakan mata! 🌈
 ​
 🛠️ Cara Penggunaan (Tutorial)
@@ -44,6 +60,8 @@ Saat pertama kali dijalankan, skrip akan otomatis mendeteksi modul yang hilang d
 
 💡 Perintah Pintasan (Chat Mode)
 ​Saat berada di mode obrolan, Anda bisa menggunakan pintasan berikut:
+
+
 ​!help : Melihat panduan lengkap.
 ​!run <perintah> : Mengeksekusi perintah terminal langsung dari chat.
 ​!browsing <query> : Mencari informasi dari web.
