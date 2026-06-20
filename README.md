@@ -1,8 +1,6 @@
-[[License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
-https://img.shields.io/badge/License-Apache_2.0-blue.svg](https://opensource.org/licenses/Apache-2.0)
-https://img.shields.io/badge/OneAI-Official_Build-ff0000.svg](https://github.com/unlimited48/OneAI)
-https://img.shields.io/badge/DMCA-Protected-success.svg](https://github.com/unlimited48/OneAI/blob/main/NOTICE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![The Real OneAI](https://img.shields.io/badge/OneAI-Official_Build-ff0000.svg)](https://github.com/unlimited48/OneAI)
+[![DMCA Protected](https://img.shields.io/badge/DMCA-Protected-success.svg)](https://github.com/unlimited48/OneAI/blob/main/NOTICE)
 
 # 🚀 OneAI: The Ultimate Termux AI Engine
 
