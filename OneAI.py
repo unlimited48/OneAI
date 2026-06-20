@@ -23,9 +23,9 @@ def pre_startup_check():
 
     # Struktur file default yang akan otomatis dibangun ulang jika terhapus
     file_dibutuhkan = {
-        "ToS.py": "def baca_tos_sistem():\n    return 'ToS Sistem Standar OneAI. Gunakan AI ini dengan bijak.'\n\ndef menu_kelola_tos():\n    print('\\n\\033[1;31m[!] Modul ToS eksternal tidak ditemukan. Fitur terbatas.\\033[0m')\n    input('\\nTekan ENTER...')",
+        "ToS.py": "def baca_tos_sistem():\n    return 'ToS Sistem Standar OneAI. Gunakan AI ini dengan bijak.'\n\ndef menu_kelola_tos():\n    print('\\n\\033[1;31m[!] Modul ToS eksternal tidak ditemukan. Fitur terbatas.\\033[0m')\n    input('\\nTekan ENTER...')\n",
         "keys.txt": "PASTE_API_KEY_1_DI_SINI\n",
-        "personas.json": "{\"1\": {\"nama\": \"Teman Dekat (Santai & Gaul)\", \"instruksi\": \"Gunakan bahasa Indonesia kasual, gaul, sering pakai kata lu-gue atau wkwk, ekspresif, dan bertingkah seolah sahabat dekat pengguna.\"}}",
+        "personas.json": "{\"1\": {\"nama\": \"Teman Dekat (Santai & Gaul)\", \"instruksi\": \"Gunakan bahasa Indonesia kasual, gaul, sering pakai kata lu-gue atau wkwk, ekspresif, dan bertingkah seolah sahabat dekat pengguna.\"}, \"2\": {\"nama\": \"Tsundere\", \"instruksi\": \"Gunakan gaya bicara yang agak ketus, cuek, tegas, tapi tetap membantu.\"}, \"3\": {\"nama\": \"Asisten Profesional\", \"instruksi\": \"Gunakan bahasa Indonesia baku, sopan, formal, dan terstruktur.\"}, \"4\": {\"nama\": \"Deep Coders Termux\", \"instruksi\": \"Bertingkah sebagai pakar coding dan system administrator Termux.\"}}",
         "models.json": "{\"1\": {\"nama\": \"gpt-oss-120b (OpenAI)\", \"id\": \"openai/gpt-oss-120b\", \"jatah_rpd\": 2000}}",
         "usage_tracker.json": "{\"tanggal\": \"\", \"rpd_terpakai\": 0, \"model_stats\": {}}",
         "memory.json": "{\"catatan_fakta\": []}",
@@ -189,20 +189,20 @@ def muat_json(path_file, data_bawaan):
     try:
         with open(path_file, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except Exception:
+    except (json.JSONDecodeError, IOError):
         return data_bawaan
 
 def simpan_json(path_file, data):
     try:
         with open(path_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=4)
+            json.dump(data, f, indent=4, ensure_ascii=False)
     except Exception as e:
         tulis_log(f"Gagal simpan JSON {path_file}: {e}")
 
 class OpenRouterSuperEngine:
     def __init__(self, keys, models_dict):
-        self.keys = keys
-        self.models_dict = models_dict
+        self.keys = keys if keys else []
+        self.models_dict = models_dict if models_dict else {}
         self.request_timestamps = []
         self.MAX_RPM = 18
         self.key_cooldowns = {}
@@ -279,6 +279,10 @@ class OpenRouterSuperEngine:
         return daftar_prioritas
 
     def kirim_request_smart(self, model_id_target, messages):
+        if not self.keys:
+            print(f"\n{M}[Error]{N} Tidak ada API Key tersedia!")
+            return None, None
+            
         self.patuhi_global_rate_limiter()
         daftar_model_dicoba = self.filter_dan_urutkan_model(model_id_target)
         if not daftar_model_dicoba:
@@ -312,7 +316,7 @@ class OpenRouterSuperEngine:
                         timeout=12
                     )
                     if response.status_code == 200:
-                        sys.stdout.write("\r" + " " * 45 + "\r")
+                        sys.stdout.write("\r" + " " * 50 + "\r")
                         sys.stdout.flush()
                         self.catat_sukses_request(model_id)
                         self.model_error_counters[model_id] = 0
@@ -332,7 +336,7 @@ class OpenRouterSuperEngine:
                         self.key_cooldowns[key] = time.time() + 999999
                         print(f"\n{M}[!] Key *{key[-4:]} Mati/Habis Saldo ({response.status_code}). Skip permanen.{N}")
                         continue
-                except requests.RequestException:
+                except requests.RequestException as e:
                     time.sleep(2 ** attempt)
                     continue
             
@@ -347,16 +351,22 @@ def muat_keys():
         with open(FILE_KEYS, 'w', encoding='utf-8') as f:
             f.write("PASTE_API_KEY_1_DI_SINI\n")
         return []
-    with open(FILE_KEYS, 'r', encoding='utf-8') as f:
-        return [
-            line.strip() for line in f
-            if line.strip() and not line.strip().startswith(("//", ";")) and "PASTE_API_KEY" not in line
-        ]
+    try:
+        with open(FILE_KEYS, 'r', encoding='utf-8') as f:
+            return [
+                line.strip() for line in f
+                if line.strip() and not line.strip().startswith(("//", ";")) and "PASTE_API_KEY" not in line
+            ]
+    except IOError:
+        return []
 
 def simpan_keys(keys_list):
-    with open(FILE_KEYS, 'w', encoding='utf-8') as f:
-        for k in keys_list:
-            f.write(f"{k}\n")
+    try:
+        with open(FILE_KEYS, 'w', encoding='utf-8') as f:
+            for k in keys_list:
+                f.write(f"{k}\n")
+    except IOError as e:
+        tulis_log(f"Gagal simpan keys: {e}")
 
 def ketik_efek(teks):
     if not teks:
@@ -421,7 +431,7 @@ def cek_status_satu_key(key):
             
             return True, "AKTIF", f"{terpakai_str}/{limit_str}", rpm_val, rpd_val
         return False, "ERROR", f"Code {res.status_code}", "N/A", "N/A"
-    except Exception:
+    except requests.RequestException:
         return False, "RTO", "No Connection", "N/A", "N/A"
 
 def hitung_mood_otomatis():
@@ -482,16 +492,20 @@ def menu_kelola_db_dan_plugins():
                 print(f"{H}[✔] DB '{nama_db}' telah diregistrasikan di '{file_db}'!{N}")
             time.sleep(1.5)
         elif pilih == '2':
-            files = [f for f in os.listdir('.') if f.endswith('.json')]
-            print(f"\n{K}--- DAFTAR FILE DATABASE JSON ---{N}")
-            for idx, file in enumerate(files, 1):
-                try:
-                    with open(file, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                    print(f" [{idx}] {file} (~{len(str(data))} karakter)")
-                except Exception:
-                    print(f" [{idx}] {file} (Gagal membaca isi JSON)")
-            input("\nTekan ENTER untuk kembali...")
+            try:
+                files = [f for f in os.listdir('.') if f.endswith('.json')]
+                print(f"\n{K}--- DAFTAR FILE DATABASE JSON ---{N}")
+                for idx, file in enumerate(files, 1):
+                    try:
+                        with open(file, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        print(f" [{idx}] {file} (~{len(str(data))} karakter)")
+                    except (json.JSONDecodeError, IOError):
+                        print(f" [{idx}] {file} (Gagal membaca isi JSON)")
+                input("\nTekan ENTER untuk kembali...")
+            except OSError as e:
+                print(f"{M}[Error] {e}{N}")
+                input("\nTekan ENTER...")
         elif pilih == '3':
             nama_plugin = input("\nMasukkan nama plugin (misal: spammer): ").strip().lower()
             if nama_plugin:
@@ -500,12 +514,15 @@ def menu_kelola_db_dan_plugins():
                     f"# Plugin Kustom: {nama_plugin}\n"
                     f"# Berjalan di platform OneAI Termux Engine\n\n"
                     f"def jalankan_plugin(*args, **kwargs):\n"
-                    f"    print('\\n{H}[Plugin {nama_plugin}] Berhasil Dieksekusi!{N}')\n"
+                    f"    print('\\n\\033[1;32m[Plugin {nama_plugin}] Berhasil Dieksekusi!\\033[0m')\n"
                     f"    print('Argumen:', args, kwargs)\n"
                 )
-                with open(file_plugin, 'w', encoding='utf-8') as f:
-                    f.write(template_code)
-                print(f"{H}[✔] Berhasil membuat plugin di {file_plugin}!{N}")
+                try:
+                    with open(file_plugin, 'w', encoding='utf-8') as f:
+                        f.write(template_code)
+                    print(f"{H}[✔] Berhasil membuat plugin di {file_plugin}!{N}")
+                except IOError as e:
+                    print(f"{M}[Error] Gagal membuat plugin: {e}{N}")
             time.sleep(1.5)
         elif pilih == '4':
             if not os.path.exists(FOLDER_PLUGINS):
@@ -513,7 +530,11 @@ def menu_kelola_db_dan_plugins():
                 time.sleep(1.5)
                 continue
                 
-            plugins = [f[:-3] for f in os.listdir(FOLDER_PLUGINS) if f.endswith('.py')]
+            try:
+                plugins = [f[:-3] for f in os.listdir(FOLDER_PLUGINS) if f.endswith('.py')]
+            except OSError:
+                plugins = []
+                
             if not plugins:
                 print(f"\n{M}[!] Belum ada plugin kustom (.py) di folder '{FOLDER_PLUGINS}'!{N}")
                 time.sleep(1.5)
@@ -528,14 +549,17 @@ def menu_kelola_db_dan_plugins():
                 try:
                     import importlib.util
                     spec = importlib.util.spec_from_file_location(target_plg, os.path.join(FOLDER_PLUGINS, f"{target_plg}.py"))
-                    module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(module)
-                    if hasattr(module, 'jalankan_plugin'):
-                        module.jalankan_plugin()
+                    if spec and spec.loader:
+                        module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(module)
+                        if hasattr(module, 'jalankan_plugin'):
+                            module.jalankan_plugin()
+                        else:
+                            print(f"{M}[❌] Plugin tidak memiliki fungsi 'jalankan_plugin'!{N}")
                     else:
-                        print(f"{M}[❌] Plugin tidak memiliki fungsi 'jalankan_plugin'!{N}")
+                        print(f"{M}[❌] Gagal memuat spesifikasi plugin!{N}")
                 except Exception as e:
-                    print(f"{M}[❌] Gagal memanggil plugin: {e}{N}")
+                    print(f"{M}[❌] Gagal memanggil plugin: {str(e)}{N}")
                 input("\nTekan ENTER untuk kembali...")
 
 def jalankan_aplikasi_utama():
@@ -548,87 +572,104 @@ def jalankan_aplikasi_utama():
         simpan_json(DB_PERSONA, persona_list)
 
     if model_list:
-        key_awal = sorted(model_list.keys(), key=lambda x: int(x))[0]
-        model_aktif = model_list[key_awal]
+        try:
+            key_awal = sorted(model_list.keys(), key=lambda x: int(x))[0]
+            model_aktif = model_list[key_awal]
+        except (ValueError, KeyError, IndexError):
+            model_aktif = {"nama": "Belum Ada Model", "id": ""}
     else:
         model_aktif = {"nama": "Belum Ada Model", "id": ""}
 
-    persona_aktif = persona_list["1"]
+    persona_aktif = persona_list.get("1", PERSONA_BAWAAN["1"])
     tulis_log("Aplikasi OneAI Berhasil Booting")
 
     __sig_enc = b'VW5saW1pdGVkIDQ4'
     __auth_enc = b'QXV0aG9yIGJ5IDogVW5saW1pdGVkNDg='
 
     while True:
-        api_keys = muat_keys()
-        jumlah_key = len(api_keys)
-        mood_panel = hitung_mood_otomatis()
-        nama_mood_singkat = mood_panel.split('(')[0].strip()
+        try:
+            api_keys = muat_keys()
+            jumlah_key = len(api_keys)
+            mood_panel = hitung_mood_otomatis()
+            nama_mood_singkat = mood_panel.split('(')[0].strip()
 
-        global_rpm, global_rpd = "0", "0"
-        if jumlah_key > 0:
-            _, _, _, k_rpm, k_rpd = cek_status_satu_key(api_keys[0])
-            if k_rpm != "N/A":
-                global_rpm = k_rpm
-            if k_rpd != "N/A":
-                global_rpd = k_rpd
+            global_rpm, global_rpd = "0", "0"
+            if jumlah_key > 0:
+                _, _, _, k_rpm, k_rpd = cek_status_satu_key(api_keys[0])
+                if k_rpm != "N/A":
+                    global_rpm = k_rpm
+                if k_rpd != "N/A":
+                    global_rpd = k_rpd
 
-        anti_edit_status = f"{H}[ ON ]{N}" if ANTI_EDIT_MODE else f"{M}[ OFF ]{N}"
+            anti_edit_status = f"{H}[ ON ]{N}" if ANTI_EDIT_MODE else f"{M}[ OFF ]{N}"
 
-        _auth_dec = base64.b64decode(__auth_enc).decode('utf-8')
+            try:
+                _auth_dec = base64.b64decode(__auth_enc).decode('utf-8')
+            except Exception:
+                _auth_dec = "OneAI Engine"
 
-        print(f"\n{P}========================================={N}")
-        print(f"       CONTROL PANEL - {NAMA_AI}       ")
-        print(f"========================================={N}")
-        print(f"[*] Jaringan       : {H}ONLINE{N}")
-        print(f"[*] Jumlah API Key : {H}{jumlah_key}{N}")
-        print(f"[*] Limit Tier RPM : {S}{global_rpm}{N}")
-        print(f"[*] Limit Tier RPD : {S}{global_rpd}{N}")
-        print(f"[*] Model Aktif    : {K}{model_aktif['nama']}{N}")
-        print(f"[*] Persona Aktif  : {B}{persona_aktif['nama']}{N}")
-        print(f"[*] Mood Hari Ini  : {S}{nama_mood_singkat}{N}")
-        print(f"[*] Copilot Mode   : {H if COPILOT_AKTIF else M}{'AKTIF' if COPILOT_AKTIF else 'NON-AKTIF'}{N}")
-        print(f"[*] Auto Update AI : {H if AUTO_UPDATE_MANDIRI else M}{'ON (AKTIF)' if AUTO_UPDATE_MANDIRI else 'OFF (NON-AKTIF)'}{N}")
-        print(f"[*] Anti-Edit Core : {anti_edit_status}")
-        print(f"[*] {random.choice(RGB_NEON)}{_auth_dec}{N}")
-        print(f"{P}-----------------------------------------{N}")
-        print(f" [{H}1{N}] Mulai Mengobrol")
-        print(f" [{H}2{N}] Ganti / Tambah Persona")
-        print(f" [{H}3{N}] Ganti / Tambah Model AI")
-        print(f" [{H}4{N}] Cek Cepat Semua Status Key")
-        print(f" [{H}5{N}] Kelola Key Interaktif")
-        print(f" [{H}6{N}] Cek Limit & Info Model AI")
-        print(f" [{H}7{N}] Kelola Dokumen ToS")
-        print(f" [{S}8{N}] Fitur Tambahan Termux & Sandbox")
-        print(f" [{S}9{N}] KELOLA LIBRARY PYTHON TUX")
-        print(f" [{S}10{N}] KELOLA DB & PLUGINS KUSTOM")
-        print(f" [{S}11{N}] AUTO-PATCHER / AI SELF-CODER")
-        print(f" [{S}12{N}] MENU SETTING COPILOT KUSTOM")
-        print(f" [{S}13{N}] TOGGLE AUTO UPDATE AI TO SCRIPT")
-        print(f" [{S}14{N}] KELOLA DOMAIN SEARCH ENGINE")
-        print(f" [{S}15{N}] CEK KESEHATAN SCRIPT & REPAIR")
-        print(f" [{S}16{N}] CONFIG BELAJAR (WHITELIST WEB)")
-        print(f" [{S}17{N}] LIHAT & HAPUS {DB_MODUL_BELAJAR}")
-        print(f" [{K}18{N}] PANEL MANAGEMENT OFFLINE AI")
-        print(f" [{K}19{N}] LIVE AI GRATIS OPENROUTER (TRENDING)")
-        print(f" [{K}20{N}] CEK & HAPUS BERKAS LOG AKTIVITAS")
-        print(f" [{K}21{N}] BERSIHKAN RAM CACHE AI")
-        print(f" [{K}22{N}] TOGGLE COPILOT MODE (ON/OFF)")
-        print(f" [{P}23{N}] TOGGLE ANTI-EDIT SCRIPT CODES (ON/OFF)")
-        print(f" [{M}X{N}] Keluar Aplikasi")
+            print(f"\n{P}========================================={N}")
+            print(f"       CONTROL PANEL - {NAMA_AI}       ")
+            print(f"========================================={N}")
+            print(f"[*] Jaringan       : {H}ONLINE{N}")
+            print(f"[*] Jumlah API Key : {H}{jumlah_key}{N}")
+            print(f"[*] Limit Tier RPM : {S}{global_rpm}{N}")
+            print(f"[*] Limit Tier RPD : {S}{global_rpd}{N}")
+            print(f"[*] Model Aktif    : {K}{model_aktif.get('nama', 'Unknown')}{N}")
+            print(f"[*] Persona Aktif  : {B}{persona_aktif.get('nama', 'Unknown')}{N}")
+            print(f"[*] Mood Hari Ini  : {S}{nama_mood_singkat}{N}")
+            print(f"[*] Copilot Mode   : {H if COPILOT_AKTIF else M}{'AKTIF' if COPILOT_AKTIF else 'NON-AKTIF'}{N}")
+            print(f"[*] Auto Update AI : {H if AUTO_UPDATE_MANDIRI else M}{'ON (AKTIF)' if AUTO_UPDATE_MANDIRI else 'OFF (NON-AKTIF)'}{N}")
+            print(f"[*] Anti-Edit Core : {anti_edit_status}")
+            print(f"[*] {random.choice(RGB_NEON)}{_auth_dec}{N}")
+            print(f"{P}-----------------------------------------{N}")
+            print(f" [{H}1{N}] Mulai Mengobrol")
+            print(f" [{H}2{N}] Ganti / Tambah Persona")
+            print(f" [{H}3{N}] Ganti / Tambah Model AI")
+            print(f" [{H}4{N}] Cek Cepat Semua Status Key")
+            print(f" [{H}5{N}] Kelola Key Interaktif")
+            print(f" [{H}6{N}] Cek Limit & Info Model AI")
+            print(f" [{H}7{N}] Kelola Dokumen ToS")
+            print(f" [{S}8{N}] Fitur Tambahan Termux & Sandbox")
+            print(f" [{S}9{N}] KELOLA LIBRARY PYTHON TUX")
+            print(f" [{S}10{N}] KELOLA DB & PLUGINS KUSTOM")
+            print(f" [{S}11{N}] AUTO-PATCHER / AI SELF-CODER")
+            print(f" [{S}12{N}] MENU SETTING COPILOT KUSTOM")
+            print(f" [{S}13{N}] TOGGLE AUTO UPDATE AI TO SCRIPT")
+            print(f" [{S}14{N}] KELOLA DOMAIN SEARCH ENGINE")
+            print(f" [{S}15{N}] CEK KESEHATAN SCRIPT & REPAIR")
+            print(f" [{S}16{N}] CONFIG BELAJAR (WHITELIST WEB)")
+            print(f" [{S}17{N}] LIHAT & HAPUS {DB_MODUL_BELAJAR}")
+            print(f" [{K}18{N}] PANEL MANAGEMENT OFFLINE AI")
+            print(f" [{K}19{N}] LIVE AI GRATIS OPENROUTER (TRENDING)")
+            print(f" [{K}20{N}] CEK & HAPUS BERKAS LOG AKTIVITAS")
+            print(f" [{K}21{N}] BERSIHKAN RAM CACHE AI")
+            print(f" [{K}22{N}] TOGGLE COPILOT MODE (ON/OFF)")
+            print(f" [{P}23{N}] TOGGLE ANTI-EDIT SCRIPT CODES (ON/OFF)")
+            print(f" [{M}X{N}] Keluar Aplikasi")
 
-        _sig_dec = base64.b64decode(__sig_enc).decode('utf-8')
-        print(f"\n{S}>> {_sig_dec} <<{N}")
-        pilihan_utama = input("Pilih menu: ").strip().lower()
+            try:
+                _sig_dec = base64.b64decode(__sig_enc).decode('utf-8')
+            except Exception:
+                _sig_dec = "Unlimited 48"
+            print(f"\n{S}>> {_sig_dec} <<{N}")
+            pilihan_utama = input("Pilih menu: ").strip().lower()
 
-        if pilihan_utama == 'x':
-            tulis_log("Aplikasi OneAI Ditutup")
-            print(f"\nAplikasi {M}{NAMA_AI}{N} ditutup. Sampai jumpa!")
-            sys.exit()
-        elif pilihan_utama == "10":
-            menu_kelola_db_dan_plugins()
-        elif pilihan_utama == "4":
-            cek_semua_limit(api_keys)
+            if pilihan_utama == 'x':
+                tulis_log("Aplikasi OneAI Ditutup")
+                print(f"\nAplikasi {M}{NAMA_AI}{N} ditutup. Sampai jumpa!")
+                sys.exit(0)
+            elif pilihan_utama == "10":
+                menu_kelola_db_dan_plugins()
+            elif pilihan_utama == "4":
+                cek_semua_limit(api_keys)
+        except KeyboardInterrupt:
+            print(f"\n\n{M}[!] Aplikasi dihentikan oleh pengguna.{N}")
+            sys.exit(0)
+        except Exception as e:
+            print(f"\n{M}[Error] Terjadi kesalahan: {str(e)}{N}")
+            tulis_log(f"Error: {str(e)}")
+            time.sleep(2)
 
 if __name__ == "__main__":
     jalankan_aplikasi_utama()
