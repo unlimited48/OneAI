@@ -61,7 +61,6 @@ Saat pertama kali dijalankan, skrip akan otomatis mendeteksi modul yang hilang d
 💡 Perintah Pintasan (Chat Mode)
 ​Saat berada di mode obrolan, Anda bisa menggunakan pintasan berikut:
 
-
 ​!help : Melihat panduan lengkap.
 ​!run <perintah> : Mengeksekusi perintah terminal langsung dari chat.
 ​!browsing <query> : Mencari informasi dari web.
