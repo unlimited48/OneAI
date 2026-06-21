@@ -34,6 +34,40 @@ Saat pertama kali dijalankan, skrip akan otomatis mendeteksi modul yang hilang d
 4. Konfigurasi API Key
 Masuk ke `Menu 5` (Kelola Key Interaktif). Masukkan API Key OpenRouter Anda (format: `sk-or-v1-...`). Sekarang Anda siap berinteraksi! ✨
 
+## ⌨️ Usage
+
+Launch OneAI by typing:  
+`python OneAI.py`
+
+## 🚀 Show menu
+
+| Command | Action |
+| --- | --- |
+| `1` | Mulai Mengobrol |
+| `2` | Ganti / Tambah Persona |
+| `3` | Ganti / Tambah Model AI |
+| `4` | Cek Cepat Semua Status Key |
+| `5` | Kelola Key Interaktif |
+| `6` | Cek Limit & Info Model AI |
+| `7` | Kelola Dokumen ToS |
+| `8` | Fitur Tambahan Termux & Sandbox |
+| `9` | KELOLA LIBRARY PYTHON TUX |
+| `10` | KELOLA DB & PLUGINS KUSTOM |
+| `11` | AUTO-PATCHER / AI SELF-CODER |
+| `12` | MENU SETTING COPILOT KUSTOM |
+| `13` | TOGGLE AUTO UPDATE AI TO SCRIPT |
+| `14` | KELOLA DOMAIN SEARCH ENGINE |
+| `15` | CEK KESEHATAN SCRIPT & REPAIR |
+| `16` | CONFIG BELAJAR (WHITELIST WEB) |
+| `17` | LIHAT & HAPUS chip_core.OneAI.metadata.db |
+| `18` | PANEL MANAGEMENT OFFLINE AI |
+| `19` | LIVE AI GRATIS OPENROUTER (TRENDING) |
+| `20` | CEK & HAPUS BERKAS LOG AKTIVITAS |
+| `21` | BERSIHKAN RAM CACHE AI |
+| `22` | TOGGLE COPILOT MODE (ON/OFF) |
+| `23` | TOGGLE ANTI-EDIT SCRIPT CODES (ON/OFF) |
+| `X` | Keluar Aplikasi |
+
 💡 Perintah Pintasan (Chat Mode)
 Saat berada di mode obrolan, Anda bisa menggunakan pintasan berikut:
 - `!help` : Melihat panduan lengkap
