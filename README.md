@@ -5,6 +5,11 @@
 [![Termux](https://img.shields.io/badge/For-Termux-black?logo=android)](https://termux.dev)
 [![GitHub Repo stars](https://img.shields.io/github/stars/unlimited48/OneAI?style=social)](https://github.com/unlimited48/OneAI/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/unlimited48/OneAI?style=social)](https://github.com/unlimited48/OneAI/network/members)
+
+<p align="center">
+  <img src="./logo.png" alt="OneAI" width="250"/>
+</p>
+
 # 🚀 OneAI: The Ultimate Termux AI Engine
 
 OneAI adalah skrip Python canggih yang dirancang khusus untuk lingkungan Termux (Android). Ini bukan sekadar chatbot biasa; ini adalah asisten sistem pintar yang terintegrasi dengan API OpenRouter, dilengkapi dengan fitur self-patching, manajemen database lokal, hingga sandbox terminal untuk bereksperimen dengan aman! 🖥️📱
