@@ -7,7 +7,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/unlimited48/OneAI?style=social)](https://github.com/unlimited48/OneAI/network/members)
 
 <p align="center">
-  <img src="./logo.png" alt="OneAI" width="250"/>
+  <img src="./logo.png" alt="OneAI" width="200"/>
 </p>
 
 # 🚀 OneAI: The Ultimate Termux AI Engine
